@@ -7,6 +7,26 @@ scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
 type Query {
     users: [User!]! @paginate(defaultCount: 10)
     user(id: ID @eq): User @find
+    userByEmail(email: String @eq): User @find
+
+    task(id: ID @eq): Task @find
+    tasks: [Task!]! @paginate(defaultCount: 10)
+}
+
+type Mutation{
+    createUser(
+        name: String @rules(apply: ["required"])
+        password: String @rules(apply: ["required"])
+        email: String @rules(apply: ["required","email","unique:users,email"])
+    ):User @create(model: "App\\User")
+    updateUser(
+        id: ID @rules(apply: ["required"])
+        name: String
+        email: String @rules(apply: ["email"])
+    ):User @update(model: "App\\User")
+    deleteUser(
+        id: ID! @rules(apply: ["required"])
+    ):User @delete(model: "App\\User")
 }
 
 type User {
@@ -15,4 +35,13 @@ type User {
     email: String!
     created_at: DateTime!
     updated_at: DateTime!
+    tasks:[Task!]! @hasMany
+}
+
+type Task{
+    id: ID!
+    task: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    user: User! @belongsTo
 }
